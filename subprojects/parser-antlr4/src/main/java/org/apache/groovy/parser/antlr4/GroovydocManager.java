@@ -28,6 +28,7 @@ import org.codehaus.groovy.ast.AnnotatedNode;
 import org.codehaus.groovy.ast.AnnotationNode;
 import org.codehaus.groovy.ast.ClassHelper;
 import org.codehaus.groovy.ast.expr.ConstantExpression;
+import groovy.lang.groovydoc.GroovydocHolder;
 
 import java.util.List;
 
@@ -40,7 +41,7 @@ import static org.codehaus.groovy.runtime.DefaultGroovyMethods.asBoolean;
  * 3) attach groovydoc to AST node as metadata
  */
 public class GroovydocManager {
-    public static final String DOC_COMMENT = "_DOC_COMMENT"; // keys for meta data
+    public static final String DOC_COMMENT = GroovydocHolder.DOC_COMMENT; // keys for meta data
     private static final String DOC_COMMENT_PREFIX = "/**";
     private static final String TRUE_STR = "true";
 
@@ -52,7 +53,8 @@ public class GroovydocManager {
     private static final boolean ATTACHING_RUNTIME_GROOVYDOC_ENABLED;
     private static final String VALUE = "value";
     private static final String RUNTIME_GROOVYDOC_PATTERN = "(?s)/[*][*]\\s+(\\s+[*]\\s*)*@Groovydoc\\b.+?[*]/";
-    private AstBuilder astBuilder;
+
+    private static final GroovydocManager INSTANCE = new GroovydocManager();
 
     static {
         ATTACHING_GROOVYDOC_ENABLED = isFeatureEnabled(ATTACH_GROOVYDOC) || isFeatureEnabled(EXTRACT_DOC_COMMENT);
@@ -71,8 +73,10 @@ public class GroovydocManager {
         return result;
     }
 
-    public GroovydocManager(AstBuilder astBuilder) {
-        this.astBuilder = astBuilder;
+    private GroovydocManager() {}
+
+    public static GroovydocManager getInstance() {
+        return INSTANCE;
     }
 
     /**
@@ -101,7 +105,11 @@ public class GroovydocManager {
             return;
         }
 
-        node.putNodeMetaData(DOC_COMMENT, docCommentNodeText);
+        if (!(node instanceof GroovydocHolder)) {
+            return;
+        }
+
+        node.putNodeMetaData(DOC_COMMENT, new groovy.lang.groovydoc.Groovydoc(docCommentNodeText, (GroovydocHolder) node));
     }
 
     /*

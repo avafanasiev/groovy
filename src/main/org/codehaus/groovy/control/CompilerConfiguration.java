@@ -26,11 +26,10 @@ import org.objectweb.asm.Opcodes;
 
 import java.io.File;
 import java.io.PrintWriter;
+import java.math.BigDecimal;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -85,7 +84,7 @@ public class CompilerConfiguration {
     public static final String[] ALLOWED_JDKS = JDK_TO_BYTECODE_VERSION_MAP.keySet().toArray(new String[0]);
 
     // Just call getVMVersion() once.
-    public static final String currentJVMVersion = getVMVersion();
+    public static final String CURRENT_JVM_VERSION = getVMVersion();
 
     // Static initializers are executed in text order,
     // therefore we must do this one last!
@@ -96,6 +95,8 @@ public class CompilerConfiguration {
      *  default context, then you probably just want <code>new CompilerConfiguration()</code>. 
      */
     public static final CompilerConfiguration DEFAULT = new CompilerConfiguration();
+
+    private static final String GROOVY_ANTLR4_OPT = "groovy.antlr4";
 
     /**
      * See {@link WarningMessage} for levels.
@@ -198,8 +199,11 @@ public class CompilerConfiguration {
     /**
      * defines if antlr2 parser should be used or the antlr4 one if
      * no factory is set yet
+     *
+     * The antlr4 parser Parrot is enabled by default
+     *
      */
-    private boolean antlr2Parser = true;
+    private ParserVersion parserVersion = ParserVersion.V_4;
 
     /**
      * Sets the Flags to defaults.
@@ -223,7 +227,7 @@ public class CompilerConfiguration {
         setDefaultScriptExtension(safeGetSystemProperty("groovy.default.scriptExtension", ".groovy"));
 
         // Source file encoding
-        String encoding = safeGetSystemProperty("file.encoding", "US-ASCII");
+        String encoding = safeGetSystemProperty("file.encoding", "UTF-8");
         encoding = safeGetSystemProperty("groovy.source.encoding", encoding);
         setSourceEncoding(encoding);
 
@@ -255,7 +259,12 @@ public class CompilerConfiguration {
         setOptimizationOptions(options);
 
         try {
-            antlr2Parser = !"true".equals(System.getProperty("groovy.antlr4"));
+            String groovyAntlr4Opt = System.getProperty(GROOVY_ANTLR4_OPT);
+
+            this.parserVersion =
+                    null == groovyAntlr4Opt || Boolean.valueOf(groovyAntlr4Opt)
+                            ? ParserVersion.V_4
+                            : ParserVersion.V_2;
         } catch (Exception e) {
             // IGNORE
         }
@@ -404,10 +413,7 @@ public class CompilerConfiguration {
      * @return true if the bytecode version is JDK 1.5+
      */
     public static boolean isPostJDK5(String bytecodeVersion) {
-        return JDK5.equals(bytecodeVersion)
-                || JDK6.equals(bytecodeVersion)
-                || JDK7.equals(bytecodeVersion)
-                || JDK8.equals(bytecodeVersion);
+        return new BigDecimal(bytecodeVersion).compareTo(new BigDecimal(JDK5)) >= 0;
     }
 
     /**
@@ -417,8 +423,7 @@ public class CompilerConfiguration {
      * @return true if the bytecode version is JDK 1.7+
      */
     public static boolean isPostJDK7(String bytecodeVersion) {
-        return JDK7.equals(bytecodeVersion)
-                || JDK8.equals(bytecodeVersion);
+        return new BigDecimal(bytecodeVersion).compareTo(new BigDecimal(JDK7)) >= 0;
     }
 
     /**
@@ -457,9 +462,9 @@ public class CompilerConfiguration {
         }
         setWarningLevel(numeric);
 
-        // 
-        // Source file encoding 
-        // 
+        //
+        // Source file encoding
+        //
         text = configuration.getProperty("groovy.source.encoding");
         if (text == null) {
             text = configuration.getProperty("file.encoding", "US-ASCII");
@@ -500,7 +505,7 @@ public class CompilerConfiguration {
 
         //
         // Tolerance
-        // 
+        //
         numeric = 10;
         try {
             text = configuration.getProperty("groovy.errors.tolerance", "10");
@@ -732,11 +737,9 @@ public class CompilerConfiguration {
 
     public ParserPluginFactory getPluginFactory() {
         if (pluginFactory == null) {
-            if (antlr2Parser) {
-                pluginFactory = ParserPluginFactory.antlr2();
-            } else {
-                pluginFactory = ParserPluginFactory.antlr4();
-            }
+            pluginFactory = ParserVersion.V_2 == parserVersion
+                                ? ParserPluginFactory.antlr2()
+                                : ParserPluginFactory.antlr4();
         }
         return pluginFactory;
     }
@@ -753,7 +756,7 @@ public class CompilerConfiguration {
     public Set<String> getScriptExtensions() {
         if(scriptExtensions == null || scriptExtensions.isEmpty()) {
             /*
-             *  this happens 
+             *  this happens
              *  *    when groovyc calls FileSystemCompiler in forked mode, or
              *  *    when FileSystemCompiler is run from the command line directly, or
              *  *    when groovy was not started using groovyc or FileSystemCompiler either
@@ -814,7 +817,7 @@ public class CompilerConfiguration {
     }
 
     private static String getVMVersion() {
-        return POST_JDK5;
+        return JDK8;
     }
 
     /**
@@ -826,7 +829,7 @@ public class CompilerConfiguration {
     }
 
     /**
-     * Sets the joint compilation options for this configuration. 
+     * Sets the joint compilation options for this configuration.
      * Using null will disable joint compilation.
      * @param options the options
      */
@@ -843,9 +846,9 @@ public class CompilerConfiguration {
     }
 
     /**
-     * Sets the optimization options for this configuration. 
-     * No entry or a true for that entry means to enable that optimization, 
-     * a false means the optimization is disabled. 
+     * Sets the optimization options for this configuration.
+     * No entry or a true for that entry means to enable that optimization,
+     * a false means the optimization is disabled.
      * Valid keys are "all" and "int".
      * @param options the options.
      * @throws IllegalArgumentException if the options are null
@@ -904,5 +907,27 @@ public class CompilerConfiguration {
 
     public void setBytecodePostprocessor(final BytecodeProcessor bytecodePostprocessor) {
         this.bytecodePostprocessor = bytecodePostprocessor;
+    }
+
+    public ParserVersion getParserVersion() {
+        return this.parserVersion;
+    }
+
+    public void setParserVersion(ParserVersion parserVersion) {
+        this.parserVersion = parserVersion;
+    }
+
+    /**
+     * Check whether invoke dynamic enabled
+     * @return the result
+     */
+    public boolean isIndyEnabled() {
+        Boolean indyEnabled = this.getOptimizationOptions().get(INVOKEDYNAMIC);
+
+        if (null == indyEnabled) {
+            return false;
+        }
+
+        return indyEnabled;
     }
 }

@@ -149,6 +149,8 @@ class SyntaxErrorTest extends GroovyTestCase {
 
     void "test groovy core - MethodDeclaration"() {
         TestUtils.shouldFail('fail/MethodDeclaration_01.groovy');
+        TestUtils.doRunAndShouldFail('fail/MethodDeclaration_02x.groovy');
+        TestUtils.doRunAndShouldFail('fail/MethodDeclaration_03x.groovy');
     }
 
     void "test groovy core - ConstructorDeclaration"() {
@@ -171,6 +173,37 @@ class SyntaxErrorTest extends GroovyTestCase {
         TestUtils.doRunAndShouldFail('fail/Void_02x.groovy');
     }
 
+    void "test groovy core - FieldDeclaration"() {
+        TestUtils.doRunAndShouldFail('fail/FieldDeclaration_01x.groovy');
+        TestUtils.doRunAndShouldFail('fail/FieldDeclaration_02x.groovy');
+        TestUtils.doRunAndShouldFail('fail/FieldDeclaration_03x.groovy');
+        TestUtils.doRunAndShouldFail('fail/FieldDeclaration_04x.groovy');
+    }
+
+    void "test groovy core - Assert"() {
+        TestUtils.doRunAndShouldFail('fail/Assert_01x.groovy');
+    }
+
+    void "test groovy core - DuplicatedNamedParameter"() {
+        TestUtils.doRunAndShouldFail('fail/DuplicatedNamedParameter_01x.groovy');
+        TestUtils.doRunAndShouldFail('fail/DuplicatedNamedParameter_02x.groovy');
+    }
+
+    void "test groovy core - threadsafe"() {
+        TestUtils.doRunAndShouldFail('fail/ThreadSafe_01x.groovy');
+    }
+
+    void "test groovy core - VarArgParameter"() {
+        TestUtils.doRunAndShouldFail('fail/VarArgParameter_01x.groovy');
+    }
+
+    void "test groovy core - Number"() {
+        TestUtils.doRunAndShouldFail('fail/Number_01x.groovy');
+        TestUtils.doRunAndShouldFail('fail/Number_02x.groovy');
+        TestUtils.doRunAndShouldFail('fail/Number_03x.groovy');
+        TestUtils.doRunAndShouldFail('fail/Number_04x.groovy');
+        TestUtils.doRunAndShouldFail('fail/Number_05x.groovy');
+    }
 
     /**************************************/
     static unzipScriptAndShouldFail(String entryName, List ignoreClazzList, Map<String, String> replacementsMap=[:], boolean toCheckNewParserOnly = false) {

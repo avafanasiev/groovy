@@ -27,7 +27,9 @@ matrix:
 
 install: true
 
-script: travis_wait 60 ./gradlew -PuseAntlr4=true test
+before_script: unset _JAVA_OPTIONS
+
+script: travis_wait 60 ./gradlew test
 
 before_cache:
   - rm -f $HOME/.gradle/caches/modules-2/modules-2.lock
@@ -35,3 +37,4 @@ cache:
   directories:
     - $HOME/.gradle/caches/
     - $HOME/.gradle/wrapper/
+

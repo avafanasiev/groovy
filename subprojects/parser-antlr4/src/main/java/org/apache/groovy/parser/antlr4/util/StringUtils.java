@@ -22,7 +22,6 @@ import groovy.lang.Closure;
 import org.apache.groovy.util.Maps;
 import org.codehaus.groovy.runtime.StringGroovyMethods;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
 
@@ -33,33 +32,33 @@ import java.util.regex.Pattern;
  * Created on    2016/08/20
  */
 public class StringUtils {
-    public static String replaceHexEscapes(String text) {
-        Pattern p = Pattern.compile("(\\\\*)\\\\u+([0-9abcdefABCDEF]{4})");
-	    return StringGroovyMethods.replaceAll((CharSequence) text, p, new Closure<Void>(null, null) {
-		    Object doCall(String _0, String _1, String _2) {
+	public static String replaceHexEscapes(String text) {
+		Pattern p = Pattern.compile("(\\\\*)\\\\u([0-9abcdefABCDEF]{4})");
+		return StringGroovyMethods.replaceAll((CharSequence) text, p, new Closure<Void>(null, null) {
+			Object doCall(String _0, String _1, String _2) {
 				if (isLengthOdd(_1)) {
 					return _0;
 				}
 
-			    return _1 + new String(Character.toChars(Integer.parseInt(_2, 16)));
-		    }
-	    });
-    }
+				return _1 + new String(Character.toChars(Integer.parseInt(_2, 16)));
+			}
+		});
+	}
 
 	public static String replaceOctalEscapes(String text) {
-	    Pattern p = Pattern.compile("(\\\\*)\\\\([0-3]?[0-7]?[0-7])");
-	    return StringGroovyMethods.replaceAll((CharSequence) text, p, new Closure<Void>(null, null) {
-		    Object doCall(String _0, String _1, String _2) {
+		Pattern p = Pattern.compile("(\\\\*)\\\\([0-3]?[0-7]?[0-7])");
+		return StringGroovyMethods.replaceAll((CharSequence) text, p, new Closure<Void>(null, null) {
+			Object doCall(String _0, String _1, String _2) {
 				if (isLengthOdd(_1)) {
 					return _0;
 				}
 
-			    return _1 + new String(Character.toChars(Integer.parseInt(_2, 8)));
-		    }
-	    });
-    }
+				return _1 + new String(Character.toChars(Integer.parseInt(_2, 8)));
+			}
+		});
+	}
 
-    private static final Map<Character, Character> STANDARD_ESCAPES = Maps.of(
+	private static final Map<Character, Character> STANDARD_ESCAPES = Maps.of(
 			'b', '\b',
 			't', '\t',
 			'n', '\n',
@@ -68,21 +67,21 @@ public class StringUtils {
 	);
 
 	public static String replaceStandardEscapes(String text) {
-	    Pattern p = Pattern.compile("(\\\\*)\\\\([btnfr\"'])");
+		Pattern p = Pattern.compile("(\\\\*)\\\\([btnfr\"'])");
 
-	    String result = StringGroovyMethods.replaceAll((CharSequence) text, p, new Closure<Void>(null, null) {
-							Object doCall(String _0, String _1, String _2) {
-								if (isLengthOdd(_1)) {
-									return _0;
-								}
+		String result = StringGroovyMethods.replaceAll((CharSequence) text, p, new Closure<Void>(null, null) {
+			Object doCall(String _0, String _1, String _2) {
+				if (isLengthOdd(_1)) {
+					return _0;
+				}
 
-								Character character = STANDARD_ESCAPES.get(_2.charAt(0));
-								return _1 + (character != null ? character : _2);
-							}
-						});
+				Character character = STANDARD_ESCAPES.get(_2.charAt(0));
+				return _1 + (character != null ? character : _2);
+			}
+		});
 
 		return result.replace("\\\\", "\\");
-    }
+	}
 
 	public static final int NONE_SLASHY = 0;
 	public static final int SLASHY = 1;
@@ -116,8 +115,8 @@ public class StringUtils {
 
 		text = StringUtils.replaceLineEscape(text);
 
-        return StringUtils.replaceStandardEscapes(replaceHexEscapes(replaceOctalEscapes(text)));
-    }
+		return StringUtils.replaceStandardEscapes(replaceHexEscapes(replaceOctalEscapes(text)));
+	}
 
 	private static String replaceLineEscape(String text) {
 		Pattern p = Pattern.compile("(\\\\*)\\\\\r?\n");
@@ -139,10 +138,16 @@ public class StringUtils {
 	}
 
 	public static String removeCR(String text) {
-        return text.replace("\r\n", "\n");
-    }
+		return text.replace("\r\n", "\n");
+	}
 
 	public static long countChar(String text, char c) {
 		return text.chars().filter(e -> c == e).count();
+	}
+
+	public static String trimQuotations(String text, int quotationLength) {
+		int length = text.length();
+
+		return length == quotationLength << 1 ? "" : text.substring(quotationLength, length - quotationLength);
 	}
 }

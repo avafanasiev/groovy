@@ -52,34 +52,34 @@ class GroovyParserTest extends GroovyTestCase {
         List<ClassNode> classes = new ArrayList<>(newAST.classes).sort { c1, c2 -> c1.name <=> c2.name };
         List<MethodNode> methods = new ArrayList<>(newAST.methods).sort { m1, m2 -> m1.name <=> m2.name };
 
-        assert classes[0].nodeMetaData[GroovydocManager.DOC_COMMENT].replaceAll(/\r?\n/, '')            == '/** * test class Comments */'
-        assert classes[0].fields[0].nodeMetaData[GroovydocManager.DOC_COMMENT].replaceAll(/\r?\n/, '')  == '/**     * test Comments.SOME_VAR     */'
-        assert classes[0].fields[1].nodeMetaData[GroovydocManager.DOC_COMMENT].replaceAll(/\r?\n/, '')  == '/**     * test Comments.SOME_VAR2     */'
-        assert classes[0].fields[2].nodeMetaData[GroovydocManager.DOC_COMMENT] == null
-        assert classes[0].fields[3].nodeMetaData[GroovydocManager.DOC_COMMENT] == null
-        assert classes[0].declaredConstructors[0].nodeMetaData[GroovydocManager.DOC_COMMENT].replaceAll(/\r?\n/, '') == '/**     * test Comments.constructor1     */'
-        assert classes[0].methods[0].nodeMetaData[GroovydocManager.DOC_COMMENT].replaceAll(/\r?\n/, '') == '/**     * test Comments.m1     */'
-        assert classes[0].methods[1].nodeMetaData[GroovydocManager.DOC_COMMENT] == null
-        assert classes[0].methods[2].nodeMetaData[GroovydocManager.DOC_COMMENT].replaceAll(/\r?\n/, '') == '/**     * test Comments.m3     */'
+        assert classes[0].groovydoc.content.replaceAll(/\r?\n/, '')            == '/** * test class Comments */'
+        assert classes[0].fields[0].groovydoc.content.replaceAll(/\r?\n/, '')  == '/**     * test Comments.SOME_VAR     */'
+        assert classes[0].fields[1].groovydoc.content.replaceAll(/\r?\n/, '')  == '/**     * test Comments.SOME_VAR2     */'
+        assert classes[0].fields[2].groovydoc == null
+        assert classes[0].fields[3].groovydoc == null
+        assert classes[0].declaredConstructors[0].groovydoc.content.replaceAll(/\r?\n/, '') == '/**     * test Comments.constructor1     */'
+        assert classes[0].methods[0].groovydoc.content.replaceAll(/\r?\n/, '') == '/**     * test Comments.m1     */'
+        assert classes[0].methods[1].groovydoc == null
+        assert classes[0].methods[2].groovydoc.content.replaceAll(/\r?\n/, '') == '/**     * test Comments.m3     */'
 
-        assert classes[1].nodeMetaData[GroovydocManager.DOC_COMMENT].replaceAll(/\r?\n/, '')            == '/**     * test class InnerClazz     */'
-        assert classes[1].fields[0].nodeMetaData[GroovydocManager.DOC_COMMENT].replaceAll(/\r?\n/, '')  == '/**         * test InnerClazz.SOME_VAR3         */'
-        assert classes[1].fields[1].nodeMetaData[GroovydocManager.DOC_COMMENT].replaceAll(/\r?\n/, '')  == '/**         * test InnerClazz.SOME_VAR4         */'
-        assert classes[1].methods[0].nodeMetaData[GroovydocManager.DOC_COMMENT].replaceAll(/\r?\n/, '') == '/**         * test Comments.m4         */'
-        assert classes[1].methods[1].nodeMetaData[GroovydocManager.DOC_COMMENT].replaceAll(/\r?\n/, '') == '/**         * test Comments.m5         */'
+        assert classes[1].groovydoc.content.replaceAll(/\r?\n/, '')            == '/**     * test class InnerClazz     */'
+        assert classes[1].fields[0].groovydoc.content.replaceAll(/\r?\n/, '')  == '/**         * test InnerClazz.SOME_VAR3         */'
+        assert classes[1].fields[1].groovydoc.content.replaceAll(/\r?\n/, '')  == '/**         * test InnerClazz.SOME_VAR4         */'
+        assert classes[1].methods[0].groovydoc.content.replaceAll(/\r?\n/, '') == '/**         * test Comments.m4         */'
+        assert classes[1].methods[1].groovydoc.content.replaceAll(/\r?\n/, '') == '/**         * test Comments.m5         */'
 
-        assert classes[2].nodeMetaData[GroovydocManager.DOC_COMMENT].replaceAll(/\r?\n/, '')            == '/**     * test class InnerEnum     */'
-        assert classes[2].fields[0].nodeMetaData[GroovydocManager.DOC_COMMENT].replaceAll(/\r?\n/, '')  == '/**         * InnerEnum.NEW         */'
-        assert classes[2].fields[1].nodeMetaData[GroovydocManager.DOC_COMMENT].replaceAll(/\r?\n/, '')  == '/**         * InnerEnum.OLD         */'
+        assert classes[2].groovydoc.content.replaceAll(/\r?\n/, '')            == '/**     * test class InnerEnum     */'
+        assert classes[2].fields[0].groovydoc.content.replaceAll(/\r?\n/, '')  == '/**         * InnerEnum.NEW         */'
+        assert classes[2].fields[1].groovydoc.content.replaceAll(/\r?\n/, '')  == '/**         * InnerEnum.OLD         */'
 
-        assert classes[3].nodeMetaData[GroovydocManager.DOC_COMMENT] == null
+        assert classes[3].groovydoc == null
 
-        assert classes[4].fields[0].nodeMetaData[GroovydocManager.DOC_COMMENT] == null
+        assert classes[4].fields[0].groovydoc == null
 
-        assert classes[5].nodeMetaData[GroovydocManager.DOC_COMMENT] == null
+        assert classes[5].groovydoc == null
 
-        assert methods[0].nodeMetaData[GroovydocManager.DOC_COMMENT].replaceAll(/\r?\n/, '') == '/** * test someScriptMethod1 */'
-        assert methods[1].nodeMetaData[GroovydocManager.DOC_COMMENT] == null
+        assert methods[0].groovydoc.content.replaceAll(/\r?\n/, '') == '/** * test someScriptMethod1 */'
+        assert methods[1].groovydoc == null
     }
 
     void "test groovy core - PackageDeclaration"() {
@@ -165,6 +165,7 @@ class GroovyParserTest extends GroovyTestCase {
 
     void "test groovy core - Map"() {
         doTest('core/Map_01.groovy');
+        doRunAndTest('core/Map_02x.groovy');
     }
 
     void "test groovy core - Expression"() {
@@ -202,6 +203,7 @@ class GroovyParserTest extends GroovyTestCase {
         doTest('core/Assert_01.groovy');
         doRunAndTest('core/Assert_02x.groovy');
         doRunAndTest('core/Assert_03x.groovy');
+        doRunAndTest('core/Assert_04x.groovy');
     }
 
     void "test groovy core - IfElse"() {
@@ -332,9 +334,11 @@ class GroovyParserTest extends GroovyTestCase {
         doRunAndTest('core/Command_06x.groovy')
     }
 
+    /*
     void "test groovy core - Unicode"() {
         doTest('core/Unicode_01.groovy');
     }
+    */
 
     void "test groovy core - BreakingChanges"() {
         doRunAndTest('core/BreakingChange_01x.groovy');
@@ -355,6 +359,14 @@ class GroovyParserTest extends GroovyTestCase {
         doRunAndTest('core/Script_01x.groovy');
     }
 
+    void "test groovy core - FieldDeclaration"() {
+        doRunAndTest('core/FieldDeclaration_01x.groovy');
+    }
+
+    void "test groovy core - Number"() {
+        doRunAndTest('core/Number_01x.groovy');
+    }
+
     void "test groovy core - BUG"() {
         doRunAndTest('bugs/BUG-GROOVY-4757.groovy');
         doRunAndTest('bugs/BUG-GROOVY-5652.groovy');
@@ -366,5 +378,7 @@ class GroovyParserTest extends GroovyTestCase {
 
         doRunAndTest('bugs/GROOVY-3898.groovy');
         doRunAndTest('bugs/GROOVY-8228.groovy');
+
+        doRunAndTest('bugs/BUG-GROOVY-8311.groovy');
     }
 }

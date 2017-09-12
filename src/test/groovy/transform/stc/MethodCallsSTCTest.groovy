@@ -18,8 +18,8 @@
  */
 package groovy.transform.stc
 
-import org.codehaus.groovy.control.customizers.ImportCustomizer;
-import static org.codehaus.groovy.control.CompilerConfiguration.DEFAULT as config
+import org.codehaus.groovy.control.ParserVersion
+import org.codehaus.groovy.control.customizers.ImportCustomizer
 
 /**
  * Unit tests for static type checking : method calls.
@@ -794,16 +794,24 @@ class MethodCallsSTCTest extends StaticTypeCheckingTestCase {
     }
 
     void testSpreadArgsForbiddenInClosureCall() {
-        shouldFailWithMessages '''
+
+        String code = '''
             def closure = { String a, String b, String c -> println "$a $b $c" }
             def strings = ['A', 'B', 'C']
             closure(*strings)
-        ''',
-                'The spread operator cannot be used as argument of method or closure calls with static type checking because the number of arguments cannot be determined at compile time'
+        '''
+
+        if (ParserVersion.V_2 == config.parserVersion) {
+            shouldFailWithMessages code, 'The spread operator cannot be used as argument of method or closure calls with static type checking because the number of arguments cannot be determined at compile time'
+        } else {
+            shouldFailWithMessages code,
+                    'The spread operator cannot be used as argument of method or closure calls with static type checking because the number of arguments cannot be determined at compile time',
+                    'Closure argument types: [java.lang.String, java.lang.String, java.lang.String] do not match with parameter types: [java.lang.Object]'
+        }
     }
 
     void testBoxingShouldCostMore() {
-        if (config.optimizationOptions.indy) return;
+        if (config.indyEnabled) return;
         assertScript '''
             int foo(int x) { 1 }
             int foo(Integer x) { 2 }

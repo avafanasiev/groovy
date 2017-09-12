@@ -18,17 +18,19 @@
  */
 package org.codehaus.groovy.ast;
 
-import java.lang.reflect.Field;
-
+import groovy.lang.groovydoc.Groovydoc;
+import groovy.lang.groovydoc.GroovydocHolder;
 import org.codehaus.groovy.ast.expr.Expression;
 import org.objectweb.asm.Opcodes;
+
+import java.lang.reflect.Field;
 
 /**
  * Represents a field (member variable)
  *
  * @author <a href="mailto:james@coredevelopers.net">James Strachan</a>
  */
-public class FieldNode extends AnnotatedNode implements Opcodes, Variable {
+public class FieldNode extends AnnotatedNode implements Opcodes, Variable, GroovydocHolder<FieldNode> {
 
     private String name;
     private int modifiers;
@@ -189,5 +191,15 @@ public class FieldNode extends AnnotatedNode implements Opcodes, Variable {
     public void rename(String name) {
         declaringClass.renameField(this.name, name);
         this.name = name;
+    }
+
+    @Override
+    public Groovydoc getGroovydoc() {
+        return this.<Groovydoc>getNodeMetaData(DOC_COMMENT);
+    }
+
+    @Override
+    public FieldNode getInstance() {
+        return this;
     }
 }
