@@ -56,6 +56,7 @@ public class FastArray implements Cloneable {
             data = newData;
         }
         data [size++] = o;
+        return;
     }
 
     public void set(int index, Object o) {
